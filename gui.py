@@ -38,22 +38,29 @@ class ModernButton(tk.Button):
         kwargs['pady'] = 8
         kwargs['padx'] = 15
         super().__init__(master, **kwargs)
+        self._original_color = kwargs.get('background') or self.cget('background')
+        self._is_hovering = False
         self.bind('<Enter>', self.on_enter)
         self.bind('<Leave>', self.on_leave)
         
     def on_enter(self, e):
-        if self['state'] != 'disabled':
-            self.configure(background=self.darken_color(self['background']))
+        if self['state'] != 'disabled' and not self._is_hovering:
+            self._is_hovering = True
+            super().configure(background=self.darken_color(self._original_color))
             
     def on_leave(self, e):
         if self['state'] != 'disabled':
-            self.configure(background=self.original_color)
+            self._is_hovering = False
+            super().configure(background=self._original_color)
             
-    def configure(self, **kwargs):
-        if 'background' in kwargs:
-            self.original_color = kwargs['background']
-        super().configure(**kwargs)
+    def configure(self, cnf=None, **kwargs):
+        if not self._is_hovering:
+            if 'background' in (cnf or {}) or 'background' in kwargs:
+                self._original_color = kwargs.get('background') or cnf.get('background')
+        super().configure(cnf or {}, **kwargs)
         
+    config = configure
+
     @staticmethod
     def darken_color(hex_color):
         """Darken a hex color by 20%"""
