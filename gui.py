@@ -223,7 +223,34 @@ def edit_keyword_popup(selected_keyword):
         else:
             messagebox.showerror("Error", "All fields are required")
     
-    ModernButton(main_frame, text="Save", background=COLORS['primary'], foreground='white', command=save_edited_keyword).pack(pady=10)
+    def remove_keyword():
+        if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete the keyword '{keyword}'?"):
+            keywords.remove(keyword)
+            del keyword_data[keyword]
+            
+            # Refresh keyword list
+            keyword_list.delete(0, tk.END)
+            for i, kw in enumerate(keywords, 1):
+                data = keyword_data[kw]
+                keyword_list.insert(tk.END, f"{i}. {kw} - {data['chat_id']} - {data['message']}")
+            
+            save_config(keywords=keywords, keyword_data=keyword_data)
+            update_terminal(f"Keyword '{keyword}' removed")
+            popup.destroy()
+
+    # Button container for layout
+    button_frame = tk.Frame(main_frame, bg=COLORS['surface'])
+    button_frame.pack(pady=10)
+    
+    ModernButton(button_frame, text="Save", 
+                background=COLORS['primary'], 
+                foreground='white',
+                command=save_edited_keyword).pack(side=tk.LEFT, padx=5)
+                
+    ModernButton(button_frame, text="Remove",
+                background=COLORS['error'],
+                foreground='white',
+                command=remove_keyword).pack(side=tk.LEFT, padx=5)
 
 def process_speech_queue():
     while not speech_queue.empty():
