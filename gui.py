@@ -6,12 +6,14 @@ import speech_module
 from telegram_module import TelegramBot
 from users import UserAuth
 from config import save_config, load_config
+import logging
 
 speech_queue = queue.Queue()
 telegram_bot = None
 root = None
 terminal = None
 keyword_list = None
+terminal_logging_enabled = True
 
 # Load saved configuration
 saved_token, keywords, keyword_data = load_config()
@@ -362,6 +364,7 @@ def open_github():
     webbrowser.open('https://github.com/hammond022/pyvoice')
 
 def show_about_dialog():
+    global terminal_logging_enabled
     about = tk.Toplevel(root)
     about.title("About AVAACS")
     about.geometry("600x400")
@@ -408,12 +411,47 @@ def show_about_dialog():
     link_label.pack(pady=(0, 20))
     link_label.bind("<Button-1>", lambda e: open_github())
     
+    # Add logging control checkbox
+    logging_var = tk.BooleanVar(value=terminal_logging_enabled)
+    logging_frame = tk.Frame(main_frame, bg=COLORS['surface'])
+    logging_frame.pack(pady=(10, 20))
+    
+    tk.Checkbutton(logging_frame, 
+                   text="Enable Verbose Logging",
+                   variable=logging_var,
+                   bg=COLORS['surface'],
+                   fg=COLORS['text'],
+                   command=lambda: toggle_terminal_logging(logging_var.get())).pack()
+
     # Copyright
     tk.Label(main_frame, text="Our Lady of Fatima University, 2025",
             font=("Segoe UI", 9),
             bg=COLORS['surface'],
             fg=COLORS['text_secondary']).pack()
 
+
+class TerminalHandler(logging.Handler):
+    def __init__(self, terminal_widget):
+        super().__init__()
+        self.terminal = terminal_widget
+        
+    def emit(self, record):
+        if not terminal_logging_enabled:
+            return
+        msg = self.format(record)
+        def _update():
+            self.terminal.config(state=tk.NORMAL)
+            self.terminal.insert(tk.END, msg + "\n")
+            self.terminal.config(state=tk.DISABLED)
+            self.terminal.yview(tk.END)
+        if self.terminal:
+            self.terminal.after(0, _update)
+
+def toggle_terminal_logging(enabled):
+    global terminal_logging_enabled
+    terminal_logging_enabled = enabled
+    if terminal:
+        update_terminal(f"Terminal logging {'enabled' if enabled else 'disabled'}")
 
 def setup_main_window(user):
     global root, terminal, keyword_list, telegram_bot, saved_token
@@ -536,6 +574,12 @@ def setup_main_window(user):
                                        wrap=tk.WORD)
     terminal.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
     terminal.config(state=tk.DISABLED)
+
+    # Setup logging to terminal
+    terminal_handler = TerminalHandler(terminal)
+    terminal_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    logging.getLogger().addHandler(terminal_handler)
+    logging.getLogger().setLevel(logging.INFO)
 
     root.after(100, process_speech_queue)
     root.mainloop()
