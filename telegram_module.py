@@ -5,10 +5,7 @@ import logging
 class TelegramBot:
     def __init__(self, token):
         self.bot = Bot(token)
-        logging.basicConfig(
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            level=logging.INFO
-        )
+        self.logger = logging.getLogger(__name__)
 
     def send_message(self, chat_id, message):
         try:
@@ -26,5 +23,5 @@ class TelegramBot:
             loop.run_until_complete(send())
             return True
         except Exception as e:
-            logging.error(f"Failed to send message: {e}")
+            self.logger.error(f"Failed to send message: {e}")
             return False

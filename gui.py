@@ -6,12 +6,14 @@ import speech_module
 from telegram_module import TelegramBot
 from users import UserAuth
 from config import save_config, load_config
+import logging
 
 speech_queue = queue.Queue()
 telegram_bot = None
 root = None
 terminal = None
 keyword_list = None
+terminal_logging_enabled = True
 
 # Load saved configuration
 saved_token, keywords, keyword_data = load_config()
@@ -36,22 +38,29 @@ class ModernButton(tk.Button):
         kwargs['pady'] = 8
         kwargs['padx'] = 15
         super().__init__(master, **kwargs)
+        self._original_color = kwargs.get('background') or self.cget('background')
+        self._is_hovering = False
         self.bind('<Enter>', self.on_enter)
         self.bind('<Leave>', self.on_leave)
         
     def on_enter(self, e):
-        if self['state'] != 'disabled':
-            self.configure(background=self.darken_color(self['background']))
+        if self['state'] != 'disabled' and not self._is_hovering:
+            self._is_hovering = True
+            super().configure(background=self.darken_color(self._original_color))
             
     def on_leave(self, e):
         if self['state'] != 'disabled':
-            self.configure(background=self.original_color)
+            self._is_hovering = False
+            super().configure(background=self._original_color)
             
-    def configure(self, **kwargs):
-        if 'background' in kwargs:
-            self.original_color = kwargs['background']
-        super().configure(**kwargs)
+    def configure(self, cnf=None, **kwargs):
+        if not self._is_hovering:
+            if 'background' in (cnf or {}) or 'background' in kwargs:
+                self._original_color = kwargs.get('background') or cnf.get('background')
+        super().configure(cnf or {}, **kwargs)
         
+    config = configure
+
     @staticmethod
     def darken_color(hex_color):
         """Darken a hex color by 20%"""
@@ -362,6 +371,7 @@ def open_github():
     webbrowser.open('https://github.com/hammond022/pyvoice')
 
 def show_about_dialog():
+    global terminal_logging_enabled
     about = tk.Toplevel(root)
     about.title("About AVAACS")
     about.geometry("600x400")
@@ -408,12 +418,47 @@ def show_about_dialog():
     link_label.pack(pady=(0, 20))
     link_label.bind("<Button-1>", lambda e: open_github())
     
+    # Add logging control checkbox
+    logging_var = tk.BooleanVar(value=terminal_logging_enabled)
+    logging_frame = tk.Frame(main_frame, bg=COLORS['surface'])
+    logging_frame.pack(pady=(10, 20))
+    
+    tk.Checkbutton(logging_frame, 
+                   text="Enable Verbose Logging",
+                   variable=logging_var,
+                   bg=COLORS['surface'],
+                   fg=COLORS['text'],
+                   command=lambda: toggle_terminal_logging(logging_var.get())).pack()
+
     # Copyright
     tk.Label(main_frame, text="Our Lady of Fatima University, 2025",
             font=("Segoe UI", 9),
             bg=COLORS['surface'],
             fg=COLORS['text_secondary']).pack()
 
+
+class TerminalHandler(logging.Handler):
+    def __init__(self, terminal_widget):
+        super().__init__()
+        self.terminal = terminal_widget
+        
+    def emit(self, record):
+        if not terminal_logging_enabled:
+            return
+        msg = self.format(record)
+        def _update():
+            self.terminal.config(state=tk.NORMAL)
+            self.terminal.insert(tk.END, msg + "\n")
+            self.terminal.config(state=tk.DISABLED)
+            self.terminal.yview(tk.END)
+        if self.terminal:
+            self.terminal.after(0, _update)
+
+def toggle_terminal_logging(enabled):
+    global terminal_logging_enabled
+    terminal_logging_enabled = enabled
+    if terminal:
+        update_terminal(f"Terminal logging {'enabled' if enabled else 'disabled'}")
 
 def setup_main_window(user):
     global root, terminal, keyword_list, telegram_bot, saved_token
@@ -536,6 +581,12 @@ def setup_main_window(user):
                                        wrap=tk.WORD)
     terminal.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
     terminal.config(state=tk.DISABLED)
+
+    # Setup logging to terminal
+    terminal_handler = TerminalHandler(terminal)
+    terminal_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    logging.getLogger().addHandler(terminal_handler)
+    logging.getLogger().setLevel(logging.INFO)
 
     root.after(100, process_speech_queue)
     root.mainloop()
