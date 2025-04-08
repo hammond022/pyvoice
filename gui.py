@@ -87,7 +87,8 @@ root = tk.Tk()
 root.title("Keyword Speech Detector")
 root.geometry("500x400")
 
-tk.Label(root, text="LOGO", font=("Arial", 20)).pack(pady=5)
+tk.Label(root, text="AVAACS", font=("Arial", 20)).pack(pady=5)
+tk.Label(root, text="Advanced Voice-Activated Alert and Communication System", font=("Arial", 8)).pack(pady=1)
 
 button_frame = tk.Frame(root)
 button_frame.pack(pady=5)
