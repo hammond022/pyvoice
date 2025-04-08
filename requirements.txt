@@ -1,3 +1,4 @@
 pyttsx3
 speechrecognition
 pyaudio
+python-telegram-bot>=20.0
