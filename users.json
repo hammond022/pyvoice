@@ -1,0 +1,17 @@
+[
+  {
+    "password": "that123",
+    "isAdmin": false,
+    "username": "this"
+  },
+  {
+    "password": "admin000",
+    "isAdmin": true,
+    "username": "admin"
+  },
+  {
+    "password": "user123",
+    "isAdmin": false,
+    "username": "user"
+  }
+]
