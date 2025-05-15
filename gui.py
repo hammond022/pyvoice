@@ -15,6 +15,8 @@ terminal = None
 keyword_list = None
 terminal_logging_enabled = True
 
+recognition_thread = None
+recognition_stop_event = None
 
 saved_token, keywords, keyword_data = load_config()
 
@@ -277,8 +279,11 @@ def process_speech_queue():
     root.after(100, process_speech_queue)
 
 def start_speech_recognition():
-    global telegram_bot, saved_token
-   
+    global telegram_bot, saved_token, recognition_thread, recognition_stop_event
+    if recognition_thread and recognition_thread.is_alive():
+        update_terminal("Speech recognition is already running.")
+        return
+
     if not telegram_bot and saved_token:
         try:
             telegram_bot = TelegramBot(saved_token.strip())
@@ -286,12 +291,23 @@ def start_speech_recognition():
         except Exception as e:
             update_terminal(f"Failed to initialize Telegram bot: {str(e)}")
 
-    speech_thread = threading.Thread(target=speech_module.recognize_speech, args=(speech_queue,), daemon=True)
-    speech_thread.start()
+    recognition_stop_event = threading.Event()
+    recognition_thread = threading.Thread(
+        target=speech_module.recognize_speech,
+        args=(speech_queue, recognition_stop_event),
+        daemon=True
+    )
+    recognition_thread.start()
     speech_queue.put("Speech recognition started.")
 
 def stop_speech_recognition():
-    speech_queue.put("Speech recognition stopped.")
+    global recognition_stop_event, recognition_thread
+    if recognition_stop_event and recognition_thread and recognition_thread.is_alive():
+        recognition_stop_event.set()
+        recognition_thread.join(timeout=2)
+        speech_queue.put("Speech recognition stopped.")
+    else:
+        speech_queue.put("Speech recognition is not running.")
 
 class LoginWindow:
     def __init__(self):
