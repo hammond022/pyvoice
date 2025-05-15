@@ -184,24 +184,31 @@ def edit_keyword_popup(selected_keyword):
                          highlightbackground='#e0e0e0',
                          highlightthickness=1)
     main_frame.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
-    
+
+    # Center all widgets in main_frame
+    main_frame.grid_rowconfigure((0,1,2,3,4,5,6,7,8), weight=1)
+    main_frame.grid_columnconfigure(0, weight=1)
+
     data = keyword_data[keyword]
-    
-    tk.Label(main_frame, text="Edit Keyword:", bg=COLORS['surface'], fg=COLORS['text']).pack(pady=5)
-    keyword_entry = ModernEntry(main_frame)
+
+    # Centered label and entry for keyword
+    tk.Label(main_frame, text="Edit Keyword:", bg=COLORS['surface'], fg=COLORS['text'], anchor="center", justify="center").grid(row=0, column=0, pady=(20,5), sticky="ew")
+    keyword_entry = ModernEntry(main_frame, justify="center")
     keyword_entry.insert(0, keyword)
-    keyword_entry.pack(pady=5)
-    
-    tk.Label(main_frame, text="Edit Telegram Chat ID:", bg=COLORS['surface'], fg=COLORS['text']).pack(pady=5)
-    chat_id_entry = ModernEntry(main_frame)
+    keyword_entry.grid(row=1, column=0, pady=(0,15), padx=40, sticky="ew")
+
+    # Centered label and entry for chat id
+    tk.Label(main_frame, text="Edit Telegram Chat ID:", bg=COLORS['surface'], fg=COLORS['text'], anchor="center", justify="center").grid(row=2, column=0, pady=5, sticky="ew")
+    chat_id_entry = ModernEntry(main_frame, justify="center")
     chat_id_entry.insert(0, data["chat_id"])
-    chat_id_entry.pack(pady=5)
-    
-    tk.Label(main_frame, text="Edit Message:", bg=COLORS['surface'], fg=COLORS['text']).pack(pady=5)
-    message_entry = ModernEntry(main_frame)
+    chat_id_entry.grid(row=3, column=0, pady=(0,15), padx=40, sticky="ew")
+
+    # Centered label and entry for message
+    tk.Label(main_frame, text="Edit Message:", bg=COLORS['surface'], fg=COLORS['text'], anchor="center", justify="center").grid(row=4, column=0, pady=5, sticky="ew")
+    message_entry = ModernEntry(main_frame, justify="center")
     message_entry.insert(0, data["message"])
-    message_entry.pack(pady=5)
-    
+    message_entry.grid(row=5, column=0, pady=(0,15), padx=40, sticky="ew")
+
     def save_edited_keyword():
         new_keyword = keyword_entry.get().strip().lower()
         chat_id = chat_id_entry.get().strip().replace('\n', '').replace('\r', '')
@@ -251,17 +258,18 @@ def edit_keyword_popup(selected_keyword):
 
 
     button_frame = tk.Frame(main_frame, bg=COLORS['surface'])
-    button_frame.pack(pady=10)
-    
+    button_frame.grid(row=6, column=0, pady=20, sticky="ew")
+    button_frame.grid_columnconfigure((0,1), weight=1)
+
     ModernButton(button_frame, text="Save", 
                 background=COLORS['primary'], 
                 foreground='white',
-                command=save_edited_keyword).pack(side=tk.LEFT, padx=5)
+                command=save_edited_keyword).grid(row=0, column=0, padx=10, sticky="ew")
                 
     ModernButton(button_frame, text="Remove",
                 background=COLORS['error'],
                 foreground='white',
-                command=remove_keyword).pack(side=tk.LEFT, padx=5)
+                command=remove_keyword).grid(row=0, column=1, padx=10, sticky="ew")
 
 def process_speech_queue():
     while not speech_queue.empty():
