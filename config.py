@@ -21,13 +21,13 @@ def validate_config(config):
 
 def save_config(telegram_token=None, keywords=None, keyword_data=None):
     try:
-        # Load existing config first
+       
         existing_config = {}
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:
                 existing_config = json.load(f)
         
-        # Update only the provided values
+
         if telegram_token:
             existing_config['telegram_token'] = telegram_token
         if keywords is not None:

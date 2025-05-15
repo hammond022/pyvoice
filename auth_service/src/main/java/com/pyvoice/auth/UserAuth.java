@@ -170,14 +170,14 @@ public class UserAuth {
     public static void main(String[] args) throws IOException {
         loadUsers();
         
-        // Start HTTP server
+     
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/auth", new AuthHandler());
         server.setExecutor(Executors.newFixedThreadPool(10));
         server.start();
         System.out.println("Auth server started on port 8000");
         
-        // Start interactive CLI
+     
         startCLI();
     }
 
@@ -186,13 +186,13 @@ public class UserAuth {
         public void handle(HttpExchange exchange) throws IOException {
             if ("POST".equals(exchange.getRequestMethod())) {
                 try {
-                    // Read request body
+                
                     String requestBody = new String(exchange.getRequestBody().readAllBytes());
                     JSONObject json = new JSONObject(requestBody);
                     String username = json.getString("username");
                     String password = json.getString("password");
 
-                    // Authenticate
+            
                     User user = users.get(username);
                     JSONObject response = new JSONObject();
                     
@@ -203,7 +203,7 @@ public class UserAuth {
                         response.put("success", false);
                     }
 
-                    // Send response
+                
                     byte[] responseBytes = response.toString().getBytes();
                     exchange.sendResponseHeaders(200, responseBytes.length);
                     try (OutputStream os = exchange.getResponseBody()) {
@@ -217,7 +217,7 @@ public class UserAuth {
                     }
                 }
             } else {
-                exchange.sendResponseHeaders(405, -1); // Method not allowed
+                exchange.sendResponseHeaders(405, -1); 
             }
         }
     }
