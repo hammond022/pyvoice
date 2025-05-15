@@ -1,0 +1,17 @@
+{
+    "telegram_token": "7877685273:AAEyRZ7g_BAPT9HJogIHxHZcPqXLe1pGxQ4",
+    "keywords": [
+        "help",
+        "test"
+    ],
+    "keyword_data": {
+        "help": {
+            "chat_id": "1785220828",
+            "message": "Help, Im in an emergency and need your help. Please contact me as soon as you can."
+        },
+        "test": {
+            "chat_id": "6243910096",
+            "message": "test"
+        }
+    }
+}

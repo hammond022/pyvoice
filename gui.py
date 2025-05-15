@@ -15,10 +15,10 @@ terminal = None
 keyword_list = None
 terminal_logging_enabled = True
 
-# Load saved configuration
+
 saved_token, keywords, keyword_data = load_config()
 
-# Add UI constants and styles at the top after imports
+
 COLORS = {
     'primary': '#1a73e8',
     'primary_dark': '#1557b0',
@@ -64,16 +64,16 @@ class ModernButton(tk.Button):
     @staticmethod
     def darken_color(hex_color):
         """Darken a hex color by 20%"""
-        # Remove the '#' if present
+      
         hex_color = hex_color.lstrip('#')
         
-        # Convert hex to RGB
+      
         rgb = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
         
-        # Darken by reducing each component by 20%
+      
         darkened = tuple(max(0, int(x * 0.8)) for x in rgb)
         
-        # Convert back to hex
+       
         return f"#{darkened[0]:02x}{darkened[1]:02x}{darkened[2]:02x}"
 
 class ModernEntry(tk.Entry):
@@ -97,7 +97,7 @@ def initialize_telegram():
     try:
         token = simpledialog.askstring("Telegram Bot", "Enter your Telegram bot token:", initialvalue=saved_token or "")
         if token:
-            # Clean the token
+          
             token = token.strip().replace('\n', '').replace('\r', '')
             telegram_bot = TelegramBot(token)
             saved_token = token
@@ -210,7 +210,7 @@ def edit_keyword_popup(selected_keyword):
             return
             
         if new_keyword and chat_id and message:
-            # Update or create new keyword
+   
             if new_keyword != keyword:
                 if new_keyword in keywords:
                     messagebox.showerror("Error", "This keyword already exists")
@@ -221,7 +221,7 @@ def edit_keyword_popup(selected_keyword):
             
             keyword_data[new_keyword] = {"chat_id": chat_id, "message": message}
             
-            # Refresh keyword list
+       
             keyword_list.delete(0, tk.END)
             for i, kw in enumerate(keywords, 1):
                 data = keyword_data[kw]
@@ -237,7 +237,7 @@ def edit_keyword_popup(selected_keyword):
             keywords.remove(keyword)
             del keyword_data[keyword]
             
-            # Refresh keyword list
+       
             keyword_list.delete(0, tk.END)
             for i, kw in enumerate(keywords, 1):
                 data = keyword_data[kw]
@@ -247,7 +247,7 @@ def edit_keyword_popup(selected_keyword):
             update_terminal(f"Keyword '{keyword}' removed")
             popup.destroy()
 
-    # Button container for layout
+
     button_frame = tk.Frame(main_frame, bg=COLORS['surface'])
     button_frame.pack(pady=10)
     
@@ -278,7 +278,7 @@ def process_speech_queue():
 
 def start_speech_recognition():
     global telegram_bot, saved_token
-    # Initialize telegram bot if not already initialized
+   
     if not telegram_bot and saved_token:
         try:
             telegram_bot = TelegramBot(saved_token.strip())
@@ -302,11 +302,11 @@ class LoginWindow:
         self.user_auth = UserAuth()
         self.logged_in_user = None
 
-        # Center content
+   
         main_frame = tk.Frame(self.window, bg=COLORS['background'])
         main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Logo and title
+   
         tk.Label(main_frame, text="AVAACS", 
                 font=("Segoe UI", 32, "bold"),
                 bg=COLORS['background'], 
@@ -317,7 +317,7 @@ class LoginWindow:
                 bg=COLORS['background'], 
                 fg=COLORS['text_secondary']).pack(pady=(0, 20))
 
-        # Login form with shadow effect
+      
         form_frame = tk.Frame(main_frame, bg=COLORS['surface'],
                             highlightbackground='#e0e0e0',
                             highlightthickness=1)
@@ -383,7 +383,7 @@ def show_about_dialog():
                          highlightthickness=1)
     main_frame.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-    # Title
+   
     tk.Label(main_frame, text="AVAACS",
             font=("Segoe UI", 24, "bold"),
             bg=COLORS['surface'],
@@ -394,7 +394,7 @@ def show_about_dialog():
             bg=COLORS['surface'],
             fg=COLORS['text_secondary']).pack()
             
-    # Description
+   
     description = """
     Advanced Voice-Activated Alert and Communication System
     
@@ -408,7 +408,7 @@ def show_about_dialog():
             fg=COLORS['text'],
             justify=tk.CENTER).pack(pady=(20, 10))
     
-    # GitHub link
+  
     link_label = tk.Label(main_frame, 
                          text="View on GitHub",
                          font=("Segoe UI", 10, "underline"),
@@ -418,7 +418,7 @@ def show_about_dialog():
     link_label.pack(pady=(0, 20))
     link_label.bind("<Button-1>", lambda e: open_github())
     
-    # Add logging control checkbox
+   
     logging_var = tk.BooleanVar(value=terminal_logging_enabled)
     logging_frame = tk.Frame(main_frame, bg=COLORS['surface'])
     logging_frame.pack(pady=(10, 20))
@@ -430,7 +430,7 @@ def show_about_dialog():
                    fg=COLORS['text'],
                    command=lambda: toggle_terminal_logging(logging_var.get())).pack()
 
-    # Copyright
+  
     tk.Label(main_frame, text="Our Lady of Fatima University, 2025",
             font=("Segoe UI", 9),
             bg=COLORS['surface'],
@@ -469,11 +469,11 @@ def setup_main_window(user):
     main_container = tk.Frame(root, bg=COLORS['background'])
     main_container.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-    # Header with gradient effect
+
     header_frame = tk.Frame(main_container, bg=COLORS['background'])
     header_frame.pack(fill=tk.X, pady=(0, 20))
     
-    # Add about button to the right side of header
+ 
     about_btn = ModernButton(header_frame, text="i",
                          background=COLORS['surface'],
                          foreground=COLORS['primary'],
@@ -494,7 +494,7 @@ def setup_main_window(user):
             bg=COLORS['background'],
             fg=COLORS['text_secondary']).pack()
 
-    # Modern button toolbar
+  
     button_frame = tk.Frame(main_container, bg=COLORS['background'])
     button_frame.pack(fill=tk.X, pady=(0, 20))
 
@@ -524,14 +524,14 @@ def setup_main_window(user):
                 foreground='white',
                 command=logout).pack(side=tk.RIGHT, padx=5)
 
-    # Keywords section
+    
     keywords_frame = tk.LabelFrame(main_container, text="Keywords",
                                  bg=COLORS['surface'],
                                  fg=COLORS['primary'],
                                  font=("Segoe UI", 11, "bold"))
     keywords_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
 
-    # Custom listbox styling
+
     keyword_list = tk.Listbox(keywords_frame,
                              bg=COLORS['surface'],
                              fg=COLORS['text'],
@@ -547,14 +547,14 @@ def setup_main_window(user):
     if user.is_admin:
         keyword_list.bind('<Double-Button-1>', lambda e: edit_keyword_popup(keyword_list.get(keyword_list.curselection())))
 
-    # Load saved keywords into list
+  
     for i, kw in enumerate(keywords, 1):
         data = keyword_data[kw]
         keyword_list.insert(tk.END, f"{i}. {kw} - {data['chat_id']} - {data['message']}")
     
-    # Initialize telegram bot if token exists
+    
     if saved_token and user.is_admin:
-        # Clean any saved token before using
+       
         saved_token = saved_token.strip().replace('\n', '').replace('\r', '')
         try:
             telegram_bot = TelegramBot(saved_token)
@@ -564,7 +564,7 @@ def setup_main_window(user):
             saved_token = None
             telegram_bot = None
 
-    # Terminal section
+  
     terminal_frame = tk.LabelFrame(main_container, text="Terminal",
                                  bg=COLORS['surface'],
                                  fg=COLORS['primary'],
@@ -582,7 +582,7 @@ def setup_main_window(user):
     terminal.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
     terminal.config(state=tk.DISABLED)
 
-    # Setup logging to terminal
+    
     terminal_handler = TerminalHandler(terminal)
     terminal_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     logging.getLogger().addHandler(terminal_handler)
